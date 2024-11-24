@@ -161,23 +161,17 @@ const PreviewScreen = () => {
     color: "#ffffff",
     zoomScale: 1,
   });
-  // const [zoomLevel, setZoomLevel] = useState(1);
-  // const [zoomX, setZoomX] = useState(50); // Centered initially
-  // const [zoomY, setZoomY] = useState(50); // Centered initially
+  const [zoomStyle, setZoomStyle] = useState(null);
   
 
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const endTimeRef = useRef(endTime);
-  // const zoomIntervalsRef = useRef(regions)
 
   useEffect(() => {
     endTimeRef.current = endTime;
   }, [endTime]);
 
-  //   useEffect(() => {
-  //   zoomIntervalsRef.current = regions;
-  // }, [regions]);
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -222,19 +216,6 @@ const PreviewScreen = () => {
     }
   }, [videoUrl]);
 
-  //   useEffect(() => {
-  //   const video = videoRef.current;
-
-  //   if (video) {
-  //     video.addEventListener('timeupdate', handleTimeUpdate);
-  //   }
-
-  //   return () => {
-  //     if (video) {
-  //       video.removeEventListener('timeupdate', handleTimeUpdate);
-  //     }
-  //   };
-  // }, []);
 
   const togglePlayPause = () => {
     if (playerRef.current) {
@@ -334,46 +315,18 @@ const handleRegionRightDrag = (e, data, index) => {
    const handleDeleteRegion = (id) => {
     setRegions(regions.filter((region) => region.id !== id));
   };
-  const fetchLeftThreshold = (id) => {
-    const foundIndex = regions.sort((a,b) =>  a.startTime - b.startTime).findIndex(region => region.id == id)
-    //  console.log(regions[foundIndex-1])
-    return foundIndex > 1? Math.floor(regions[foundIndex-1].endTime) : 0
+  const handleZoomState = ()=> {
+     const currTime = (videoRef.current.currentTime);
+     const activeBlock = regions.find(region =>currTime >= region.startTime && currTime<=region.endTime)
+     const styles = activeBlock ? {
+              transform: `scale(${activeBlock.zoomScale}) translate(${(50 - activeBlock.xCoordinate) * (activeBlock.zoomScale - 1)}%, ${(50 - activeBlock.yCoordinate) * (activeBlock.zoomScale - 1)}%)`,
+                transformOrigin: 'center',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+     } : {}
+     setZoomStyle(styles)
   }
-    const fetchRightThreshold = (id) => {
-    const foundIndex = regions.sort((a,b) =>  a.startTime - b.startTime).findIndex(region => region.id == id)
-    return foundIndex > 1? Math.floor(regions[foundIndex+1].startTime) : 700
-   
-  }
-  //   const applyZoomForCurrentTime = (time) => {
-  //    console.log(Math.floor(time)) 
-  //    console.log(regionsRef.current)
-  //   const activeRegion = regionsRef.current.find((region) => time >= region.startTime && time <= region.endTime);
-  //   console.log(activeRegion)
-  //   if (activeRegion) {
-  //     const videoElement = videoRef.current;
-  //     videoElement.style.transform = `scale(${activeRegion.zoomScale})`;
-  //     videoElement.style.transformOrigin = `${activeRegion.xCoordinate}% ${activeRegion.yCoordinate}%`;
-  //   } else {
-  //     videoRef.current.style.transform = "scale(1)";
-  //   }
-  // };
-  //  const handleTimeUpdate = () => {
-  //   if (videoRef.current) {
-  //     const currentTime = videoRef.current.currentTime;
-  //     const intCurrentTime = Math.floor(currentTime)
-  //     // Find the zoom level and coordinates for the current time using zoomIntervalsRef
-
-  //     const currentInterval = zoomIntervalsRef.current.find(
-  //       (interval) => intCurrentTime >= interval.startTime && intCurrentTime < interval.endTime
-  //     );
-  //     console.log(currentInterval)
-  //     if (currentInterval) {
-  //       setZoomLevel(currentInterval.zoomScale);
-  //       setZoomX(currentInterval.xCoordinate);
-  //       setZoomY(currentInterval.yCoordinate);
-  //     }
-  //   }
-  // };
 
   return (
     <div>
@@ -381,7 +334,7 @@ const handleRegionRightDrag = (e, data, index) => {
     <Container>
       <VideoContainer>
         {videoUrl ? (
-          <video ref={videoRef} className="video-js vjs-default-skin" controls>
+          <video ref={videoRef} className="video-js vjs-default-skin" controls onTimeUpdate={handleZoomState} style = {zoomStyle}>  
             <source src={videoUrl} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
@@ -426,7 +379,6 @@ const handleRegionRightDrag = (e, data, index) => {
           </Pointer>
         </Draggable> */}
         {regions.length === 0 ? (
-        // Only two draggable pointers when no regions
         <>
   <Draggable
           axis="x"
@@ -450,7 +402,6 @@ const handleRegionRightDrag = (e, data, index) => {
         </Draggable>
         </>
       ) : (
-        // Default pointers at start and end, plus additional ones based on `regions`
         <>
  <Draggable
           axis="x"
@@ -473,10 +424,8 @@ const handleRegionRightDrag = (e, data, index) => {
           </Pointer>
         </Draggable>
 
-          {/* Pointers based on regions */}
           {regions.map((region)=>  {
             return(       <div>
-              {/* Left pointer for each region */}
               <Draggable
                 axis="x"
                 bounds={{
@@ -491,7 +440,6 @@ const handleRegionRightDrag = (e, data, index) => {
                 </Pointer>
               </Draggable>
 
-              {/* Right pointer for each region */}
               <Draggable
                 axis="x"
                 bounds={{
