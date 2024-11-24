@@ -264,19 +264,51 @@ const PreviewScreen = () => {
   };
 
 const handleRegionLeftDrag = (e, data, index) => {
-    setRegions((prevItems) =>
-      prevItems.map((item) =>
-        item.id === index ? { ...item, startTime:(data.x / 700) * duration  } : item
-      )
-    );
-    console.log("After" , regions)
-  };
+    setRegions((prevItems) => {
+      const sortedRegions = [...prevItems].sort((a, b) => a.startTime - b.startTime);
+
+      const currentIndex = sortedRegions.findIndex((item) => item.id === index);
+
+      const previousEndTime = currentIndex > 0 ? sortedRegions[currentIndex - 1].endTime : null;
+
+      const newStartTime = ((data.x / 700) * duration);
+
+      console.log(newStartTime <= previousEndTime)
+      if (previousEndTime !== null && newStartTime <= previousEndTime) {
+        console.log("Overlap detected with the previous region's endTime.");
+        return prevItems;
+      }
+      return prevItems.map((item) =>
+        item.id === index ? { ...item, startTime: (data.x / 700) * duration } : item
+      );
+    });
+
+};
+
 const handleRegionRightDrag = (e, data, index) => {
-    setRegions((prevItems) =>
-      prevItems.map((item) =>
-        item.id === index ? { ...item, endTime:(data.x / 700) * duration  } : item
-      )
-    );
+   setRegions((prevItems) => {
+      const sortedRegions = [...prevItems].sort((a, b) => a.startTime - b.startTime);
+
+      const currentIndex = sortedRegions.findIndex((item) => item.id === index);
+
+      console.log(currentIndex)
+
+      const nextStartTime = currentIndex >= 0 ? sortedRegions[currentIndex + 1].startTime : null;
+
+      const newStartTime = ((data.x / 700) * duration);
+      console.log("current time" , newStartTime)
+      console.log("next", nextStartTime)
+
+      console.log(newStartTime >= nextStartTime)
+
+      if (nextStartTime !== null && newStartTime >= nextStartTime) {
+        console.log("Overlap detected with the previous region's endTime.");
+        return prevItems;
+      }
+      return prevItems.map((item) =>
+        item.id === index ? { ...item, endTime: (data.x / 700) * duration } : item
+      );
+    });
   };
 
   const handleDrawerToggle = () => {
