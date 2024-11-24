@@ -11,6 +11,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ChromePicker } from "react-color";
 import Header from "./header";
+import { red } from "@mui/material/colors";
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -276,7 +277,6 @@ const handleRegionRightDrag = (e, data, index) => {
         item.id === index ? { ...item, endTime:(data.x / 700) * duration  } : item
       )
     );
-    console.log("After" , regions)
   };
 
   const handleDrawerToggle = () => {
@@ -306,6 +306,16 @@ const handleRegionRightDrag = (e, data, index) => {
    const handleDeleteRegion = (id) => {
     setRegions(regions.filter((region) => region.id !== id));
   };
+  const fetchLeftThreshold = (id) => {
+    const foundIndex = regions.sort((a,b) =>  a.startTime - b.startTime).findIndex(region => region.id == id)
+    //  console.log(regions[foundIndex-1])
+    return foundIndex > 1? Math.floor(regions[foundIndex-1].endTime) : 0
+  }
+    const fetchRightThreshold = (id) => {
+    const foundIndex = regions.sort((a,b) =>  a.startTime - b.startTime).findIndex(region => region.id == id)
+    return foundIndex > 1? Math.floor(regions[foundIndex+1].startTime) : 700
+   
+  }
   //   const applyZoomForCurrentTime = (time) => {
   //    console.log(Math.floor(time)) 
   //    console.log(regionsRef.current)
@@ -436,10 +446,9 @@ const handleRegionRightDrag = (e, data, index) => {
         </Draggable>
 
           {/* Pointers based on regions */}
-          {regions.map((region)=> (
-          <div>
+          {regions.map((region)=>  {
+            return(       <div>
               {/* Left pointer for each region */}
-  
               <Draggable
                 axis="x"
                 bounds={{
@@ -468,8 +477,9 @@ const handleRegionRightDrag = (e, data, index) => {
                   <TimeDisplay>{Math.floor(region.endTime)}s</TimeDisplay>
                 </Pointer>
               </Draggable>
-            </div>
-          ))}
+            </div>)
+          })            
+          }
         </>
       )}
       </div>
