@@ -296,10 +296,6 @@ const handleRegionRightDrag = (e, data, index) => {
       const nextStartTime = currentIndex >= 0 ? sortedRegions[currentIndex + 1].startTime : null;
 
       const newStartTime = ((data.x / 700) * duration);
-      console.log("current time" , newStartTime)
-      console.log("next", nextStartTime)
-
-      console.log(newStartTime >= nextStartTime)
 
       if (nextStartTime !== null && newStartTime >= nextStartTime) {
         console.log("Overlap detected with the previous region's endTime.");
