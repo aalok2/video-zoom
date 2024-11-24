@@ -121,7 +121,12 @@ const PreviewScreen = () => {
   const [blockStartTime, setBlockStartTime] = useState(0);
   const [blockEndTime, setBlockEndTime] = useState(0);
   const [blockKey, setBlockKey] = useState("");
-
+const [zoomX, setZoomX] = useState(50); // Default X at center (50%)
+const [zoomY, setZoomY] = useState(50); // Default Y at center (50%)
+const [inputX, setInputX] = useState(50); // For user input
+const [inputY, setInputY] = useState(50); // For user input
+const [inputZoom, setInputZoom] = useState(1); // Default zoom factor for user input
+  const [zoomLevel, setZoomLevel] = useState(1);
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const endTimeRef = useRef(endTime);
@@ -145,6 +150,16 @@ const PreviewScreen = () => {
 
     fetchVideo();
   }, []);
+   useEffect(() => {
+    if (isPlaying) {
+      const handleRealTimeZoom = () => {
+        videoRef.current.style.transform = `scale(${zoomLevel})`;
+        videoRef.current.style.transformOrigin = `${zoomX}% ${zoomY}%`;
+      };
+
+      handleRealTimeZoom();
+    }
+  }, [zoomLevel, zoomX, zoomY, isPlaying]);
 
   useEffect(() => {
     if (videoUrl && !playerRef.current) {
@@ -218,20 +233,54 @@ const PreviewScreen = () => {
       setBlockEndTime(endTime);
     }
   };
+ const handleXInputChange = (e) => {
+  const x = Math.max(0, Math.min(100, Number(e.target.value))); // Clamp between 0-100%
+  setInputX(x);
+   setZoomX(x);
+};
+
+const handleYInputChange = (e) => {
+  const y = Math.max(0, Math.min(100, Number(e.target.value))); // Clamp between 0-100%
+  setInputY(y);
+      setZoomY(y);
+};
+const applyZoomCoordinates = () => {
+  setZoomX(inputX);
+  setZoomY(inputY);
+};
+ const handleZoomInputChange = (e) => {
+    const zoom = Math.max(1, Math.min(3, Number(e.target.value))); // Clamp between 1x and 3x
+    setInputZoom(zoom);
+    setZoomLevel(zoom);
+  };
+
+
 
   return (
     <Container>
       <Title>Video Editor</Title>
       <VideoContainer>
-        {videoUrl ? (
-          <video ref={videoRef} className="video-js vjs-default-skin" controls>
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+       {videoUrl ? (
+          <div className="video-mask" style={{ overflow: 'hidden', width: '=60%', height: '60%' }}>
+            <video
+              ref={videoRef}
+              className="video-js vjs-default-skin"
+              controls
+              style={{
+                transform: `scale(${zoomLevel}) translate(${(50 - zoomX) * (zoomLevel - 1)}%, ${(50 - zoomY) * (zoomLevel - 1)}%)`,
+                transformOrigin: 'center',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            >
+              <source src={videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
         ) : (
           <p>Loading video...</p>
         )}
-
   <TimelineContainer>
                 <SelectedArea
             style={{
@@ -305,6 +354,36 @@ const PreviewScreen = () => {
           </Button>
         </SideTray>
       </VideoContainer>
+ <div>
+          <label>
+            Zoom Level (1-3x):
+            <input
+              type="number"
+              value={inputZoom}
+              onChange={handleZoomInputChange}
+              step="0.1"
+              min="1"
+              max="3"
+            />
+          </label>
+          <label>
+            X Coordinate (0-100%):
+            <input
+              type="number"
+              value={inputX}
+              onChange={handleXInputChange}
+            />
+          </label>
+          <label>
+            Y Coordinate (0-100%):
+            <input
+              type="number"
+              value={inputY}
+              onChange={handleYInputChange}
+            />
+          </label>
+        </div>
+
     </Container>
   );
 };
