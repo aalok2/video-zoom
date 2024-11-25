@@ -9,6 +9,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit"
 import { ChromePicker } from "react-color";
 import Header from "./header";
 import { red } from "@mui/material/colors";
@@ -17,11 +18,12 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background-color: #f0f2f5;
-  padding: 20px;
+  height: 70vh;
+  background-color: #e3edf7; /* Replace with your chosen color */
 `;
 
+const width = (90 /100 * ( window.innerWidth) -18)
+console.log(width)
 const Title = styled.h1`
   font-size: 28px;
   font-weight: 600;
@@ -35,25 +37,25 @@ const VideoContainer = styled.div`
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
   padding: 20px;
   text-align: center;
-  max-width: 700px;
+  max-width: 666px;
   width: 100%;
   height: 500px;
 `;
 
 const TimelineContainer = styled.div`
-  position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
-  height: 40px;
+  width: 90%;
+  height: 60px;
   margin-top: 20px;
   background-color: #e0e0e0;
   border-radius: 5px;
+  padding-left: 20px;
 `;
 
 const Pointer = styled.div`
   position: absolute;
-  height: 140%;
+  height: 120%;
   width: 3px;
   background-color: #6c63ff;
   cursor: pointer;
@@ -72,10 +74,11 @@ const TimeDisplay = styled.div`
 const ButtonContainer = styled.div`
   display: flex;
   gap: 15px;
-  justify-content: left;
-  margin-top: 40px;
-  margin-left: 40px;
-  margin-bottom: 40px;
+  justify-content: center;
+  margin-top: 30px;
+  margin-left: 30px;
+  margin-bottom: 20px;
+  padding-right: 20px;
 `;
 
 const StyledButton = styled(IconButton)`
@@ -84,8 +87,8 @@ const StyledButton = styled(IconButton)`
   &:hover {
     background-color: #5a52e0 !important;
   }
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
 `;
 
 const SelectedArea = styled.div`
@@ -122,19 +125,19 @@ const RegionItem = styled.li`
 `;
 const ColorDisplay = styled.span`
   display: inline-block;
-  width: 16px;
-  height: 16px;
+  width: 10px;
+  height: 10px;
   background-color: ${(props) => props.color};
   border-radius: 50%;
   margin-right: 8px;
   border: 1px solid #ccc;
+  border-left:2px
 `;
 const RegionInfo = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 4px;
-   font-size: 0.85rem
-`;
+  margin-bottom: 2px;
+  `;
 const RegionDetails = styled.div`
   flex-grow: 1;
   display: flex;
@@ -160,6 +163,7 @@ const PreviewScreen = () => {
     yCoordinate: 0,
     color: "#ffffff",
     zoomScale: 1,
+    id:0
   });
   const [zoomStyle, setZoomStyle] = useState(null);
   
@@ -167,11 +171,15 @@ const PreviewScreen = () => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const endTimeRef = useRef(endTime);
+  // const zoomIntervalsRef = useRef(regions)
 
   useEffect(() => {
     endTimeRef.current = endTime;
   }, [endTime]);
 
+  //   useEffect(() => {
+  //   zoomIntervalsRef.current = regions;
+  // }, [regions]);
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -194,8 +202,8 @@ const PreviewScreen = () => {
       playerRef.current = videojs(videoRef.current, {
         controls: true,
         preload: "auto",
-        width: 640,
-        height: 360,
+        width: 700,
+        height: 450,
       });
 
       playerRef.current.on("loadedmetadata", () => {
@@ -213,9 +221,28 @@ const PreviewScreen = () => {
           setCurrentTime(current);
         }
       });
+            playerRef.current.on("pause", () => {
+        setIsPlaying(false);
+      });
+               playerRef.current.on("play", () => {
+        setIsPlaying(true);
+      });
     }
   }, [videoUrl]);
 
+  //   useEffect(() => {
+  //   const video = videoRef.current;
+
+  //   if (video) {
+  //     video.addEventListener('timeupdate', handleTimeUpdate);
+  //   }
+
+  //   return () => {
+  //     if (video) {
+  //       video.removeEventListener('timeupdate', handleTimeUpdate);
+  //     }
+  //   };
+  // }, []);
 
   const togglePlayPause = () => {
     if (playerRef.current) {
@@ -229,7 +256,7 @@ const PreviewScreen = () => {
   };
 
   const handleDragLeft = (e, data) => {
-    const newTime = Math.min((data.x / 700) * duration, endTime - 0.1);
+    const newTime = Math.min((data.x / width) * duration, endTime - 0.1);
     if (newTime < endTime) {
       setCurrentTime(newTime);
     }
@@ -240,7 +267,7 @@ const PreviewScreen = () => {
   };
 
    const handleDragRight = (e, data) => {
-    const newEndTime = Math.max((data.x / 700) * duration, currentTime + 0.1);
+    const newEndTime = Math.max((data.x / width) * duration, currentTime + 0.1);
     setEndTime(Math.floor(newEndTime));
   };
 
@@ -252,7 +279,7 @@ const handleRegionLeftDrag = (e, data, index) => {
 
       const previousEndTime = currentIndex > 0 ? sortedRegions[currentIndex - 1].endTime : null;
 
-      const newStartTime = ((data.x / 700) * duration);
+      const newStartTime = ((data.x / width) * duration);
 
       console.log(newStartTime <= previousEndTime)
       if (previousEndTime !== null && newStartTime <= previousEndTime) {
@@ -260,7 +287,7 @@ const handleRegionLeftDrag = (e, data, index) => {
         return prevItems;
       }
       return prevItems.map((item) =>
-        item.id === index ? { ...item, startTime: (data.x / 700) * duration } : item
+        item.id === index ? { ...item, startTime: (data.x / width) * duration } : item
       );
     });
 
@@ -276,14 +303,14 @@ const handleRegionRightDrag = (e, data, index) => {
 
       const nextStartTime = currentIndex >= 0 ? sortedRegions[currentIndex + 1].startTime : null;
 
-      const newStartTime = ((data.x / 700) * duration);
+      const newStartTime = ((data.x / width) * duration);
 
       if (nextStartTime !== null && newStartTime >= nextStartTime) {
         console.log("Overlap detected with the previous region's endTime.");
         return prevItems;
       }
       return prevItems.map((item) =>
-        item.id === index ? { ...item, endTime: (data.x / 700) * duration } : item
+        item.id === index ? { ...item, endTime: (data.x / width) * duration } : item
       );
     });
   };
@@ -291,17 +318,30 @@ const handleRegionRightDrag = (e, data, index) => {
   const handleDrawerToggle = () => {
     setIsDrawerOpen((prev) => !prev);
   };
-
     const handleInputChange = (field, value) => {
     setFormValues((prevValues) => ({ ...prevValues, [field]: value }));
   };
   
-  const handleSaveRegion = () => {
-    const newRegion = {
-      id: regions.length + 1,
-      ...formValues,
-    };
+  const handleSaveRegion = (formValues) => {
+const regionFound = regions.find(region => region.id === formValues.id);
+console.log("Found Region", regionFound);
+console.log("Form Values" , formValues)
+
+if (regionFound) {
+  const updatedRegion = { ...regionFound, ...formValues };
+  console.log("updated" , updatedRegion)
+  setRegions(regions.map(region => 
+    region.id === formValues.id ? updatedRegion : region
+  ))
+}
+   else {
+const newRegion = {
+  ...formValues,
+  id: regions.length +1,  // This will now override any `id` in `formValues`
+};
+    console.log("new" , newRegion)
      setRegions([...regions, newRegion]);
+}
     setIsDrawerOpen(false);
     setFormValues({
       startTime: 0,
@@ -310,11 +350,24 @@ const handleRegionRightDrag = (e, data, index) => {
       yCoordinate: 0,
       color: "#ffffff",
       zoomScale: 1,
+      id : 0
     });
   };
    const handleDeleteRegion = (id) => {
     setRegions(regions.filter((region) => region.id !== id));
   };
+  //    const handleEditRegion = (id) => {
+  //    setRegions((prevItems) => {
+  //     const editRegionFound = [...prevItems].find((item) => item.id === id);
+
+  //     if (!editRegionFound) {
+  //       return prevItems;
+  //     }
+  //     return prevItems.map((item) =>
+  //       item.id === index ? { ...item, endTime: (data.x / width) * duration } : item
+  //     );
+  //   });
+  // };
   const handleZoomState = ()=> {
      const currTime = (videoRef.current.currentTime);
      const activeBlock = regions.find(region =>currTime >= region.startTime && currTime<=region.endTime)
@@ -327,12 +380,23 @@ const handleRegionRightDrag = (e, data, index) => {
      } : {}
      setZoomStyle(styles)
   }
+  const handleDoubleClick = (e)=> {
+         const currTime = e.pageX
+         console.log(regions)
+     const activeBlock = regions.find(region => currTime >= ((region.startTime / duration)* width) && currTime<=(region.endTime / duration)* width)
+     if(activeBlock) 
+     {
+      console.log("Activeblock" ,activeBlock)
+      setFormValues(activeBlock)
+      setIsDrawerOpen(true)
+     }
+  }
 
   return (
-    <div>
+    <div backgroundColor = "#e0e0e0">
       <Header/>
     <Container>
-      <VideoContainer>
+                <div className="video-mask" style={{ overflow: 'hidden', width: '=80%', height: '80%' }}>
         {videoUrl ? (
           <video ref={videoRef} className="video-js vjs-default-skin" controls onTimeUpdate={handleZoomState} style = {zoomStyle}>  
             <source src={videoUrl} type="video/mp4" />
@@ -341,134 +405,7 @@ const handleRegionRightDrag = (e, data, index) => {
         ) : (
           <p>Loading video...</p>
         )}
-
-  <TimelineContainer>
- <div style={{ position: "relative", height: "40px", width: "100%" }}>
-      {regions.map((region, index) => {
-        const { startTime, endTime, color } = region;
-
-        return (
-          <SelectedArea
-            key={index}
-            style={{
-              left: `${(startTime / duration) * 100}%`,
-              width: `${((endTime - startTime) / duration) * 100}%`,
-              backgroundColor: color || "rgba(108, 99, 255, 0.4)", // Default color if no color is provided
-            }}
-          />
-        );
-      })}
-        {/* <Draggable
-          axis="x"
-          bounds={{ left: 0, right: (endTime / duration) * 700 }}
-          position={{ x: (currentTime / duration) * 700, y: 0 }}
-          onDrag={handleDragLeft}
-        >
-          <Pointer>
-            <TimeDisplay>{Math.floor(currentTime)}s</TimeDisplay>
-          </Pointer>
-        </Draggable>
-        <Draggable
-          axis="x"
-          bounds={{ left: (currentTime / duration) * 700, right: 700 }}
-          position={{ x: (endTime / duration) * 700, y: 0 }}
-          onDrag={handleDragRight}
-        >
-          <Pointer style={{ backgroundColor: "#ff6363" }}>
-            <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
-          </Pointer>
-        </Draggable> */}
-        {regions.length === 0 ? (
-        <>
-  <Draggable
-          axis="x"
-          bounds={{ left: 0, right: (endTime / duration) * 700 }}
-          position={{ x: (currentTime / duration) * 700, y: 0 }}
-          onDrag={handleDragLeft}
-        >
-          <Pointer>
-            <TimeDisplay>{Math.floor(currentTime)}s</TimeDisplay>
-          </Pointer>
-        </Draggable>
-        <Draggable
-          axis="x"
-          bounds={{ left: (currentTime / duration) * 700, right: 700 }}
-          position={{ x: (endTime / duration) * 700, y: 0 }}
-          onDrag={handleDragRight}
-        >
-          <Pointer style={{ backgroundColor: "#ff6363" }}>
-            <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
-          </Pointer>
-        </Draggable>
-        </>
-      ) : (
-        <>
- <Draggable
-          axis="x"
-          bounds={{ left: 0, right: (endTime / duration) * 700 }}
-          position={{ x: (currentTime / duration) * 700, y: 0 }}
-          onDrag={handleDragLeft}
-        >
-          <Pointer>
-            <TimeDisplay>{Math.floor(currentTime)}s</TimeDisplay>
-          </Pointer>
-        </Draggable>
-        <Draggable
-          axis="x"
-          bounds={{ left: (currentTime / duration) * 700, right: 700 }}
-          position={{ x: (endTime / duration) * 700, y: 0 }}
-          onDrag={handleDragRight}
-        >
-          <Pointer style={{ backgroundColor: "#ff6363" }}>
-            <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
-          </Pointer>
-        </Draggable>
-
-          {regions.map((region)=>  {
-            return(       <div>
-              <Draggable
-                axis="x"
-                bounds={{
-                  left:0,
-                  right: (region.endTime / duration) * 700,
-                }}
-                position={{ x: (region.startTime / duration) * 700, y: 0 }}
-                onDrag={(e, data) => handleRegionLeftDrag(e, data, region.id)}
-              >
-                <Pointer style={{ backgroundColor: region.color || "#1086FF" }}>
-                  <TimeDisplay>{Math.floor(region.startTime)}s</TimeDisplay>
-                </Pointer>
-              </Draggable>
-
-              <Draggable
-                axis="x"
-                bounds={{
-                  left: (region.startTime / duration) * 700,
-                  right:700,
-                }}
-                position={{ x: (region.endTime / duration) * 700, y: 0 }}
-                onDrag={(e, data) => handleRegionRightDrag(e, data, region.id)}
-              >
-                <Pointer style={{ backgroundColor: region.color || "#ff6363" }}>
-                  <TimeDisplay>{Math.floor(region.endTime)}s</TimeDisplay>
-                </Pointer>
-              </Draggable>
-            </div>)
-          })            
-          }
-        </>
-      )}
-      </div>
-      </TimelineContainer>
-
-        <ButtonContainer>
-          <StyledButton onClick={togglePlayPause}>
-            {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-          </StyledButton>
-          <StyledButton onClick={handleDrawerToggle}>
-            <AddIcon />
-          </StyledButton>
-        </ButtonContainer>
+        </div>
 
   <SwipeableDrawer
         anchor="right"
@@ -531,31 +468,162 @@ const handleRegionRightDrag = (e, data, index) => {
             <Button
               variant="contained"
               color="primary"
-              onClick={handleSaveRegion}
+              onClick={() => handleSaveRegion(formValues)}
             >
               Save
             </Button>
-        <h2>Added Regions</h2>
+        <h3>Zoom Regions Available</h3>
             <RegionList>
     {regions.map((region) => (
       <RegionItem key={region.id}>
         <RegionDetails>
-          <RegionInfo>
-        <RegionText variant="body1">Start: {region.startTime}s, End: {region.endTime}s </RegionText>
-        <RegionText variant="body1">Zoom: {region.zoomScale}</RegionText>
+          <RegionInfo style={{padding:"2px"}}>
+        <RegionText style={{paddingRight:"5px" , display : "flex" , fontSize: "14px", fontWeight: "500" ,alignItems : "center" }} >Start: {region.startTime}'s, End: {region.endTime}'s , Zoom: {region.zoomScale} <ColorDisplay color={region.color}/> </RegionText>
                     </RegionInfo>
-        <ColorDisplay color={region.color} />
         </RegionDetails>
-        <IconButton onClick={() => handleDeleteRegion(region.id)} color="error">
-          <DeleteIcon />
-        </IconButton>
-      </RegionItem>
+           <IconButton  style = {{paddingTop:"1px"}} onClick={() => handleDeleteRegion(region.id)} color="error">
+          <DeleteIcon/>
+              </IconButton>
+      </RegionItem> 
     ))}
   </RegionList>
               </div>
        </SwipeableDrawer>
-      </VideoContainer>
     </Container>
+    <div style={{display: "flex", alignItems: "center" , backgroundColor : "#e3edf7" }}>
+    <TimelineContainer onDoubleClick={(e) => handleDoubleClick(e)}>
+ <div style={{ position: "relative", height: "60px", width: "100%" }}>
+      {regions.map((region, index) => {
+        const { startTime, endTime, color } = region;
+
+        return (
+          <SelectedArea
+            key={index}
+            style={{
+              left: `${(startTime / duration) * 100}%`,
+              width: `${((endTime - startTime) / duration) * 100}%`,
+              backgroundColor: color || "rgba(108, 99, 255, 0.4)", // Default color if no color is provided
+            }}
+          />
+        );
+      })}
+        {/* <Draggable
+          axis="x"
+          bounds={{ left: 0, right: (endTime / duration) * width }}
+          position={{ x: (currentTime / duration) * width, y: 0 }}
+          onDrag={handleDragLeft}
+        >
+                   <Pointer style={{ height: "140%" }}>
+            <TimeDisplay>{Math.floor(currentTime)}s</TimeDisplay>
+          </Pointer>
+        </Draggable>
+        <Draggable
+          axis="x"
+          bounds={{ left: (currentTime / duration) * width, right: width }}
+          position={{ x: (endTime / duration) * width, y: 0 }}
+          onDrag={handleDragRight}
+        >
+          <Pointer style={{ backgroundColor: "#ff7f7f" }}>
+            <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
+          </Pointer>
+        </Draggable> */}
+        {regions.length === 0 ? (
+        // Only two draggable pointers when no regions
+        <>
+  <Draggable
+          axis="x"
+          bounds={{ left: 0, right: (endTime / duration) * width }}
+          position={{ x: (currentTime / duration) * width, y: 0 }}
+          onDrag={handleDragLeft}
+        >
+                   <Pointer style={{backgroundColor : "#6c63ff"}}>
+            <TimeDisplay>{Math.floor(currentTime)}s</TimeDisplay>
+          </Pointer>
+        </Draggable>
+        <Draggable
+          axis="x"
+          bounds={{ left: (currentTime / duration) * width, right: width }}
+          position={{ x: (endTime / duration) * width, y: 0 }}
+          onDrag={handleDragRight}
+        >
+          <Pointer style={{ backgroundColor: "#ff7f7f"}}>
+            <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
+          </Pointer>
+        </Draggable>
+        </>
+      ) : (
+        // Default pointers at start and end, plus additional ones based on `regions`
+        <>
+ <Draggable
+          axis="x"
+          bounds={{ left: 0, right: (endTime / duration) * width }}
+          position={{ x: (currentTime / duration) * width, y: 0 }}
+          onDrag={handleDragLeft}
+        >
+                   <Pointer style={{backgroundColor : "#6c63ff"}}>
+            <TimeDisplay>{Math.floor(currentTime)}s</TimeDisplay>
+          </Pointer>
+        </Draggable>
+        <Draggable
+          axis="x"
+          bounds={{ left: (currentTime / duration) * width, right: width }}
+          position={{ x: (endTime / duration) * width, y: 0 }}
+          onDrag={handleDragRight}
+        >
+          <Pointer style={{ backgroundColor: "#ff7f7f" }}>
+            <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
+          </Pointer>
+        </Draggable>
+
+          {/* Pointers based on regions */}
+          {regions.map((region)=>  {
+            return(       <div>
+              {/* Left pointer for each region */}
+              <Draggable
+                axis="x"
+                bounds={{
+                  left:0,
+                  right: (region.endTime / duration) * width,
+                }}
+                position={{ x: (region.startTime / duration) * width, y: 0 }}
+                onDrag={(e, data) => handleRegionLeftDrag(e, data, region.id)}
+              >
+                <Pointer style={{ backgroundColor: region.color || "#1086FF"}}>
+                  <TimeDisplay>{Math.floor(region.startTime)}s</TimeDisplay>
+                </Pointer>
+              </Draggable>
+
+              {/* Right pointer for each region */}
+              <Draggable
+                axis="x"
+                bounds={{
+                  left: (region.startTime / duration) * width,
+                  right:width,
+                }}
+                position={{ x: (region.endTime / duration) * width, y: 0 }}
+                onDrag={(e, data) => handleRegionRightDrag(e, data, region.id)}
+              >
+                <Pointer style={{ backgroundColor: region.color || "#ff7f7f" }}>
+                  <TimeDisplay>{Math.floor(region.endTime)}s</TimeDisplay>
+                </Pointer>
+              </Draggable>
+            </div>)
+          })            
+          }
+        </>
+      )}
+      </div>
+      </TimelineContainer>
+
+        <ButtonContainer>
+          <StyledButton onClick={togglePlayPause}>
+            {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+          </StyledButton>
+          <StyledButton onClick={handleDrawerToggle}>
+            <AddIcon />
+          </StyledButton>
+        </ButtonContainer>
+        </div>
     </div>
   );
 };

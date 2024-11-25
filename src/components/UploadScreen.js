@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { openDB } from 'idb'; // Import idb library
 import cloudUploadImage from "../images/cloudUplaod.png"; 
-
+import Header from "./header";
 const AppContainer = styled.div`
   display: flex;
   align-items: center;

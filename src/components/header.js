@@ -20,15 +20,19 @@ const headerStyle = {
   justifyContent: 'space-between',
   alignItems: 'center',
   padding: '10px 20px',
-  backgroundColor: '#333',
-  color: '#fff',
+  color: '#000', // Adjust text color to match the background
   height: '80px',
-  borderBottom: '1px solid #444',
+  borderBottom: '0.2px  #444',
+  backgroundImage: 'linear-gradient(to bottom, #f8e8a8, #d3d3d3)', // Light yellow to light gray gradient
 };
+
+
+
 
 const projectTitleStyle = {
   fontSize: '25px',
   fontWeight: 'bold',
+  fontFamily : 'Lobster'
 };
 
 const rightActionsStyle = {
