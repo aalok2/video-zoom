@@ -4,12 +4,18 @@ import { openDB } from "idb";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import Draggable from "react-draggable";
-import { IconButton, SwipeableDrawer, TextField, Button ,Typography} from "@mui/material";
+import {
+  IconButton,
+  SwipeableDrawer,
+  TextField,
+  Button,
+  Typography,
+} from "@mui/material";	
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit"
+import EditIcon from "@mui/icons-material/Edit";
 import { ChromePicker } from "react-color";
 import Header from "./header";
 import { red } from "@mui/material/colors";
@@ -125,24 +131,24 @@ const RegionItem = styled.li`
 `;
 const ColorDisplay = styled.span`
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   background-color: ${(props) => props.color};
   border-radius: 50%;
   margin-right: 8px;
   border: 1px solid #ccc;
-  border-left:2px
+  border-left:1px
 `;
 const RegionInfo = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 2px;
-  `;
+`;
 const RegionDetails = styled.div`
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  font-size: 0.85rem
+  font-size: 0.85rem;
 `;
 
 const RegionText = styled(Typography)`
@@ -155,22 +161,22 @@ const PreviewScreen = () => {
   const [endTime, setEndTime] = useState(100);
   const [isPlaying, setIsPlaying] = useState(false);
   const [regions, setRegions] = useState([]);
- const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-   const [formValues, setFormValues] = useState({
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [formValues, setFormValues] = useState({
     startTime: 0,
     endTime: 0,
     xCoordinate: 0,
     yCoordinate: 0,
     color: "#ffffff",
     zoomScale: 1,
-    id:0
+    id: 0,
   });
   const [zoomStyle, setZoomStyle] = useState(null);
-  const [width , setWindowWidth] =useState(0)
+  const [width, setWindowWidth] = useState(0);
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const endTimeRef = useRef(endTime);
-  const timeLineWidthRef = useRef(null)
+  const timeLineWidthRef = useRef(null);
   // const zoomIntervalsRef = useRef(regions)
 
   useEffect(() => {
@@ -181,22 +187,22 @@ const PreviewScreen = () => {
   //   zoomIntervalsRef.current = regions;
   // }, [regions]);
 
-      const updateWidth =() => {
-
-    if(timeLineWidthRef) {
-      setWindowWidth(timeLineWidthRef.current.getBoundingClientRect().width - 20)
+  const updateWidth = () => {
+    if (timeLineWidthRef) {
+      setWindowWidth(
+        timeLineWidthRef.current.getBoundingClientRect().width - 20
+      );
     }
-    }
+  };
   useEffect(() => {
-
-    updateWidth()
+    updateWidth();
 
     console.log(width);
 
-    window.addEventListener("resize" , updateWidth())
+    window.addEventListener("resize", updateWidth);
 
-    return (() => window.removeEventListener("resize" , updateWidth()))
-  } , [])
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -238,10 +244,10 @@ const PreviewScreen = () => {
           setCurrentTime(current);
         }
       });
-            playerRef.current.on("pause", () => {
+      playerRef.current.on("pause", () => {
         setIsPlaying(false);
       });
-               playerRef.current.on("play", () => {
+      playerRef.current.on("play", () => {
         setIsPlaying(true);
       });
     }
@@ -283,51 +289,59 @@ const PreviewScreen = () => {
     }
   };
 
-   const handleDragRight = (e, data) => {
+  const handleDragRight = (e, data) => {
     const newEndTime = Math.max((data.x / width) * duration, currentTime + 0.1);
     setEndTime(Math.floor(newEndTime));
   };
 
-const handleRegionLeftDrag = (e, data, index) => {
+  const handleRegionLeftDrag = (e, data, index) => {
     setRegions((prevItems) => {
-      const sortedRegions = [...prevItems].sort((a, b) => a.startTime - b.startTime);
+      const sortedRegions = [...prevItems].sort(
+        (a, b) => a.startTime - b.startTime
+      );
 
       const currentIndex = sortedRegions.findIndex((item) => item.id === index);
 
-      const previousEndTime = currentIndex > 0 ? sortedRegions[currentIndex - 1].endTime : null;
+      const previousEndTime =
+        currentIndex > 0 ? sortedRegions[currentIndex - 1].endTime : null;
 
-      const newStartTime = ((data.x / width) * duration);
+      const newStartTime = (data.x / width) * duration;
 
-      console.log(newStartTime <= previousEndTime)
+      console.log(newStartTime <= previousEndTime);
       if (previousEndTime !== null && newStartTime <= previousEndTime) {
         console.log("Overlap detected with the previous region's endTime.");
         return prevItems;
       }
       return prevItems.map((item) =>
-        item.id === index ? { ...item, startTime: (data.x / width) * duration } : item
+        item.id === index
+          ? { ...item, startTime: (data.x / width) * duration }
+          : item
       );
     });
+  };
 
-};
-
-const handleRegionRightDrag = (e, data, index) => {
-   setRegions((prevItems) => {
-      const sortedRegions = [...prevItems].sort((a, b) => a.startTime - b.startTime);
+  const handleRegionRightDrag = (e, data, index) => {
+    setRegions((prevItems) => {
+      const sortedRegions = [...prevItems].sort(
+        (a, b) => a.startTime - b.startTime
+      );
 
       const currentIndex = sortedRegions.findIndex((item) => item.id === index);
 
-      console.log(currentIndex)
+      console.log(currentIndex);
 
-      const nextStartTime = currentIndex >= 0 ? sortedRegions[currentIndex + 1].startTime : null;
+    const nextStartTime = currentIndex >=0 ? currentIndex+ 1 < sortedRegions.length ? sortedRegions[currentIndex + 1].startTime : null : null;
 
-      const newStartTime = ((data.x / width) * duration);
+      const newStartTime = (data.x / width) * duration;
 
       if (nextStartTime !== null && newStartTime >= nextStartTime) {
         console.log("Overlap detected with the previous region's endTime.");
         return prevItems;
       }
       return prevItems.map((item) =>
-        item.id === index ? { ...item, endTime: (data.x / width) * duration } : item
+        item.id === index
+          ? { ...item, endTime: (data.x / width) * duration }
+          : item
       );
     });
   };
@@ -335,77 +349,76 @@ const handleRegionRightDrag = (e, data, index) => {
   const handleDrawerToggle = () => {
     setIsDrawerOpen((prev) => !prev);
   };
-    const handleInputChange = (field, value) => {
-      console.log("Field"  , field , "value" , value)
+  const handleInputChange = (field, value) => {
+    console.log("Field", field, "value", value);
     setFormValues((prevValues) => ({ ...prevValues, [field]: value }));
   };
-  
-//   const handleSaveRegion = (formValues) => {
-// const regionFound = regions.find(region => region.id === formValues.id);
-// console.log("Found Region", regionFound);
-// console.log("Form Values" , formValues)
 
-// if (regionFound) {
-//   const updatedRegion = { ...regionFound, ...formValues };
-//   console.log("updated" , updatedRegion)
-//   setRegions(regions.map(region => 
-//     region.id === formValues.id ? updatedRegion : region
-//   ))
-// }
-//    else {
-// const newRegion = {
-//   ...formValues,
-//   id: regions.length +1,  // This will now override any `id` in `formValues`
-// };
-//     console.log("new" , newRegion)
-//      setRegions([...regions, newRegion]);
-// }
-//     setIsDrawerOpen(false);
-//     setFormValues({
-//       startTime: 0,
-//       endTime: 0,
-//       xCoordinate: 0,
-//       yCoordinate: 0,
-//       color: "#ffffff",
-//       zoomScale: 1,
-//       id : 0
-//     });
-//   };
-const handleSaveRegion = (formValues) => {
-console.log("Form Values:", formValues);
-setRegions((regions) => {
-  console.log("Previous Regions:", regions);
+  //   const handleSaveRegion = (formValues) => {
+  // const regionFound = regions.find(region => region.id === formValues.id);
+  // console.log("Found Region", regionFound);
+  // console.log("Form Values" , formValues)
 
-  const regionFound = regions.find((region) => region.id === formValues.id);
-  console.log("Region Found:", regionFound);
+  // if (regionFound) {
+  //   const updatedRegion = { ...regionFound, ...formValues };
+  //   console.log("updated" , updatedRegion)
+  //   setRegions(regions.map(region =>
+  //     region.id === formValues.id ? updatedRegion : region
+  //   ))
+  // }
+  //    else {
+  // const newRegion = {
+  //   ...formValues,
+  //   id: regions.length +1,  // This will now override any `id` in `formValues`
+  // };
+  //     console.log("new" , newRegion)
+  //      setRegions([...regions, newRegion]);
+  // }
+  //     setIsDrawerOpen(false);
+  //     setFormValues({
+  //       startTime: 0,
+  //       endTime: 0,
+  //       xCoordinate: 0,
+  //       yCoordinate: 0,
+  //       color: "#ffffff",
+  //       zoomScale: 1,
+  //       id : 0
+  //     });
+  //   };
+  const handleSaveRegion = (formValues) => {
+    console.log("Form Values:", formValues);
+    setRegions((regions) => {
+      console.log("Previous Regions:", regions);
 
-  if (regionFound) {
-    return regions.map((region) =>
-      region.id === formValues.id ? { ...region, ...formValues } : region
-    );
-  } else {
-    const newRegion = { ...formValues, id: regions.length+1 };
-    console.log("New Region:", newRegion);
-    return [...regions, newRegion];
-  }
+      const regionFound = regions.find((region) => region.id === formValues.id);
+      console.log("Region Found:", regionFound);
 
-});
+      if (regionFound) {
+        return regions.map((region) =>
+          region.id === formValues.id ? { ...region, ...formValues } : region
+        );
+      } else {
+        const newRegion = { ...formValues, id: regions.length + 1 };
+        console.log("New Region:", newRegion);
+        return [...regions, newRegion];
+      }
+    });
 
-console.log("Drawer Closing and Form Reset");
+    console.log("Drawer Closing and Form Reset");
 
-  setIsDrawerOpen(false);
-  setFormValues({
-    startTime: 0,
-    endTime: 0,
-    xCoordinate: 0,
-    yCoordinate: 0,
-    color: "#ffffff",
-    zoomScale: 1,
-    id: 0,
-  });
-};
-  
-const handleDeleteRegion = (id) => {
+    setIsDrawerOpen(false);
+    setFormValues({
+      startTime: 0,
+      endTime: 0,
+      xCoordinate: 0,
+      yCoordinate: 0,
+      color: "#ffffff",
+      zoomScale: 1,
+      id: 0,
+    });
+  };
+
+  const handleDeleteRegion = (id) => {
     setRegions(regions.filter((region) => region.id !== id));
   };
   //    const handleEditRegion = (id) => {
@@ -420,88 +433,138 @@ const handleDeleteRegion = (id) => {
   //     );
   //   });
   // };
-  const handleZoomState = ()=> {
-     const currTime = (videoRef.current.currentTime);
-     const activeBlock = regions.find(region =>currTime >= region.startTime && currTime<=region.endTime)
-     const styles = activeBlock ? {
-              transform: `scale(${activeBlock.zoomScale}) translate(${(50 - activeBlock.xCoordinate) * (activeBlock.zoomScale - 1)}%, ${(50 - activeBlock.yCoordinate) * (activeBlock.zoomScale - 1)}%)`,
-                transformOrigin: 'center',
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-     } : {}
-     setZoomStyle(styles)
-  }
-  const handleDoubleClick = (e)=> {
-         const currTime = e.pageX
-         console.log(regions)
-     const activeBlock = regions.find(region => currTime >= ((region.startTime / duration)* width) && currTime<=(region.endTime / duration)* width)
-     if(activeBlock) 
-     {
-      console.log("Activeblock" ,activeBlock)
-      setFormValues(activeBlock)
-      setIsDrawerOpen(true)
-     }
-  }
+
+  const handleZoomState = () => {
+    const currTime = videoRef.current.currentTime;
+    const activeBlock = regions.find(
+      (region) => currTime >= region.startTime && currTime <= region.endTime
+    );
+
+    const styles = activeBlock
+      ? {
+          transformOrigin: "0 0",
+          transform: `scale(${
+            activeBlock.zoomScale
+          }) translate(${-activeBlock.xCoordinate}px, ${-activeBlock.yCoordinate}px)`,
+          width: `calc(100% + ${activeBlock.xCoordinate}px)`,
+          height: `calc(100% + ${activeBlock.yCoordinate}px)`,
+          objectFit: "cover",
+        }
+      : {
+          transform: "none",
+          transformOrigin: "center",
+        };
+
+    setZoomStyle(styles);
+  };
+  // const handleZoomState = () => {
+  //   const currTime = videoRef.current.currentTime;
+  //   const activeBlock = regions.find(
+  //     (region) => currTime >= region.startTime && currTime <= region.endTime
+  //   );
+
+  //   const styles = activeBlock
+  //     ? {
+  //         transformOrigin: "0 0",
+  //         transform: `scale(${activeBlock.zoomScale}) translate(${
+  //           (0.5 - activeBlock.xCoordinate / 100) *
+  //           (activeBlock.zoomScale - 1) *
+  //           100
+  //         }%, ${
+  //           (0.5 - activeBlock.yCoordinate / 100) *
+  //           (activeBlock.zoomScale - 1) *
+  //           100
+  //         }%)`,
+  //         width: "100%",
+  //         height: "100%",
+  //         objectFit: "cover",
+  //       }
+  //     : {
+  //         transform: "none",
+  //         transformOrigin: "center",
+  //       };
+
+  //   setZoomStyle(styles);
+  // };
+
+  const handleDoubleClick = (e) => {
+    const currTime = e.pageX;
+    console.log(regions);
+    const activeBlock = regions.find(
+      (region) =>
+        currTime >= (region.startTime / duration) * width &&
+        currTime <= (region.endTime / duration) * width
+    );
+    if (activeBlock) {
+      console.log("Activeblock", activeBlock);
+      setFormValues(activeBlock);
+      setIsDrawerOpen(true);
+    }
+  };
 
   return (
-    <div backgroundColor = "#e0e0e0">
-      <Header/>
-    <Container>
-                <div className="video-mask" style={{ overflow: 'hidden', width: '=80%', height: '80%' }}>
-        {videoUrl ? (
-          <video ref={videoRef} className="video-js vjs-default-skin" controls onTimeUpdate={handleZoomState} style = {zoomStyle}>  
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        ) : (
-          <p>Loading video...</p>
-        )}
+    <div backgroundColor='#e0e0e0'>
+      <Header />
+      <Container>
+        <div
+          className='video-mask'
+          style={{ overflow: "hidden", width: "=80%", height: "80%" }}
+        >
+          {videoUrl ? (
+            <video
+              ref={videoRef}
+              className='video-js vjs-default-skin'
+              controls
+              onTimeUpdate={handleZoomState}
+              style={zoomStyle}
+            >
+              <source src={videoUrl} type='video/mp4' />
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            <p>Loading video...</p>
+          )}
         </div>
 
-  <SwipeableDrawer
-        anchor="right"
+        <SwipeableDrawer
+          anchor='right'
           open={isDrawerOpen}
           onClose={handleDrawerToggle}
           onOpen={handleDrawerToggle}
         >
-         <div style={{ padding: "20px", width: "300px" }}>
+          <div style={{ padding: "20px", width: "300px" }}>
             <h3>Add Zoom Block</h3>
             <TextField
-              type="text"
-              label="Start Time"
+              type='text'
+              label='Start Time'
               value={formValues.startTime}
               onChange={(e) => handleInputChange("startTime", e.target.value)}
               fullWidth
-              margin="normal"
+              margin='normal'
             />
             <TextField
-              type="text"
-              label="End Time"
+              type='text'
+              label='End Time'
               value={formValues.endTime}
               onChange={(e) => handleInputChange("endTime", e.target.value)}
               fullWidth
-              margin="normal"
+              margin='normal'
             />
             <TextField
-              type="text"
-              label="X Coordinate"
+              type='text'
+              label='X Coordinate'
               value={formValues.xCoordinate}
-              onChange={(e) =>
-                handleInputChange("xCoordinate", e.target.value)
-              }
+              onChange={(e) => handleInputChange("xCoordinate", e.target.value)}
               fullWidth
-              margin="normal"
+              margin='normal'
             />
             <TextField
-              type="text"
-              label="Y Coordinate"
+              type='text'
+              label='Y Coordinate'
               value={formValues.yCoordinate}
-              onChange={(e) =>
-                handleInputChange("yCoordinate", e.target.value)
-              }
+              onChange={(e) => handleInputChange("yCoordinate", e.target.value)}
               fullWidth
-              margin="normal"
+              margin='normal'
             />
             <div style={{ margin: "20px 0" }}>
               <ChromePicker
@@ -510,56 +573,70 @@ const handleDeleteRegion = (id) => {
               />
             </div>
             <TextField
-              type="text"
-              label="Zoom Scale"
+              type='text'
+              label='Zoom Scale'
               value={formValues.zoomScale}
               onChange={(e) => handleInputChange("zoomScale", e.target.value)}
               fullWidth
-              margin="normal"
+              margin='normal'
             />
             <Button
-              variant="contained"
-              color="primary"
+              variant='contained'
+              color='primary'
               onClick={() => handleSaveRegion(formValues)}
             >
               Save
             </Button>
-        <h3>Zoom Regions Available</h3>
+            <h3>Zoom Regions Available</h3>
             <RegionList>
-    {regions.map((region) => (
-      <RegionItem key={region.id}>
-        <RegionDetails>
-          <RegionInfo style={{padding:"2px"}}>
-        <RegionText style={{paddingRight:"5px" , display : "flex" , fontSize: "14px", fontWeight: "500" ,alignItems : "center" }} >Start: {region.startTime}'s, End: {region.endTime}'s , Zoom: {region.zoomScale} <ColorDisplay color={region.color}/> </RegionText>
+              {regions.map((region) => (
+                <RegionItem key={region.id}>
+                  <RegionDetails>
+                    <RegionInfo style={{ padding: "2px" }}>
+                    <RegionText style={{paddingRight:"5px" , display : "flex" , fontSize: "14px", fontWeight: "500" ,alignItems : "center" }} >Start: {Number(region.startTime).toFixed(2)}'s, End: {Number(region.endTime).toFixed(2)}'s , Zoom: {region.zoomScale} <ColorDisplay color={region.color}/> </RegionText>
+                      
                     </RegionInfo>
-        </RegionDetails>
-           <IconButton  style = {{paddingTop:"1px"}} onClick={() => handleDeleteRegion(region.id)} color="error">
-          <DeleteIcon/>
-              </IconButton>
-      </RegionItem> 
-    ))}
-  </RegionList>
-              </div>
-       </SwipeableDrawer>
-    </Container>
-    <div style={{display: "flex", alignItems: "center" , backgroundColor : "#e3edf7" }}>
-    <TimelineContainer onDoubleClick={(e) => handleDoubleClick(e)} ref ={timeLineWidthRef}>
- <div style={{ position: "relative", height: "60px", width: "100%" }}>
-      {regions.map((region, index) => {
-        const { startTime, endTime, color } = region;
+                  </RegionDetails>
+                  <IconButton
+                    style={{ paddingTop: "1px" }}
+                    onClick={() => handleDeleteRegion(region.id)}
+                    color='error'
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </RegionItem>
+              ))}
+            </RegionList>
+          </div>
+        </SwipeableDrawer>
+      </Container>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          backgroundColor: "#e3edf7",
+        }}
+      >
+        <TimelineContainer
+          onDoubleClick={(e) => handleDoubleClick(e)}
+          ref={timeLineWidthRef}
+        >
+          <div style={{ position: "relative", height: "60px", width: "100%" }}>
+            {regions.map((region, index) => {
+              const { startTime, endTime, color } = region;
 
-        return (
-          <SelectedArea
-            key={index}
-            style={{
-              left: `${(startTime / duration) * 100}%`,
-              width: `${((endTime - startTime) / duration) * 100}%`,
-              backgroundColor: color || "rgba(108, 99, 255, 0.4)", // Default color if no color is provided
-            }}
-          />
-        );
-      })}
-        {/* <Draggable
+              return (
+                <SelectedArea
+                  key={index}
+                  style={{
+                    left: `${(startTime / duration) * 100}%`,
+                    width: `${((endTime - startTime) / duration) * 100}%`,
+                    backgroundColor: color || "rgba(108, 99, 255, 0.4)", // Default color if no color is provided
+                  }}
+                />
+              );
+            })}
+            {/* <Draggable
           axis="x"
           bounds={{ left: 0, right: (endTime / duration) * width }}
           position={{ x: (currentTime / duration) * width, y: 0 }}
@@ -579,93 +656,112 @@ const handleDeleteRegion = (id) => {
             <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
           </Pointer>
         </Draggable> */}
-        {regions.length === 0 ? (
-        // Only two draggable pointers when no regions
-        <>
-  <Draggable
-          axis="x"
-          bounds={{ left: 0, right: (endTime / duration) * width }}
-          position={{ x: (currentTime / duration) * width, y: 0 }}
-          onDrag={handleDragLeft}
-        >
-                   <Pointer style={{backgroundColor : "#6c63ff"}}>
-            <TimeDisplay>{Math.floor(currentTime)}s</TimeDisplay>
-          </Pointer>
-        </Draggable>
-        <Draggable
-          axis="x"
-          bounds={{ left: (currentTime / duration) * width, right: width }}
-          position={{ x: (endTime / duration) * width, y: 0 }}
-          onDrag={handleDragRight}
-        >
-          <Pointer style={{ backgroundColor: "#ff7f7f"}}>
-            <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
-          </Pointer>
-        </Draggable>
-        </>
-      ) : (
-        // Default pointers at start and end, plus additional ones based on `regions`
-        <>
- <Draggable
-          axis="x"
-          bounds={{ left: 0, right: (endTime / duration) * width }}
-          position={{ x: (currentTime / duration) * width, y: 0 }}
-          onDrag={handleDragLeft}
-        >
-                   <Pointer style={{backgroundColor : "#6c63ff"}}>
-            <TimeDisplay>{Math.floor(currentTime)}s</TimeDisplay>
-          </Pointer>
-        </Draggable>
-        <Draggable
-          axis="x"
-          bounds={{ left: (currentTime / duration) * width, right: width }}
-          position={{ x: (endTime / duration) * width, y: 0 }}
-          onDrag={handleDragRight}
-        >
-          <Pointer style={{ backgroundColor: "#ff7f7f" }}>
-            <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
-          </Pointer>
-        </Draggable>
+            {regions.length === 0 ? (
+              // Only two draggable pointers when no regions
+              <>
+                <Draggable
+                  axis='x'
+                  bounds={{ left: 0, right: (endTime / duration) * width }}
+                  position={{ x: (currentTime / duration) * width, y: 0 }}
+                  onDrag={handleDragLeft}
+                >
+                  <Pointer style={{ backgroundColor: "#6c63ff" }}>
+                    <TimeDisplay>{Math.floor(currentTime)}s</TimeDisplay>
+                  </Pointer>
+                </Draggable>
+                <Draggable
+                  axis='x'
+                  bounds={{
+                    left: (currentTime / duration) * width,
+                    right: width,
+                  }}
+                  position={{ x: (endTime / duration) * width, y: 0 }}
+                  onDrag={handleDragRight}
+                >
+                  <Pointer style={{ backgroundColor: "#ff7f7f" }}>
+                    <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
+                  </Pointer>
+                </Draggable>
+              </>
+            ) : (
+              // Default pointers at start and end, plus additional ones based on `regions`
+              <>
+                <Draggable
+                  axis='x'
+                  bounds={{ left: 0, right: (endTime / duration) * width }}
+                  position={{ x: (currentTime / duration) * width, y: 0 }}
+                  onDrag={handleDragLeft}
+                >
+                  <Pointer style={{ backgroundColor: "#6c63ff" }}>
+                    <TimeDisplay>{Math.floor(currentTime)}s</TimeDisplay>
+                  </Pointer>
+                </Draggable>
+                <Draggable
+                  axis='x'
+                  bounds={{
+                    left: (currentTime / duration) * width,
+                    right: width,
+                  }}
+                  position={{ x: (endTime / duration) * width, y: 0 }}
+                  onDrag={handleDragRight}
+                >
+                  <Pointer style={{ backgroundColor: "#ff7f7f" }}>
+                    <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
+                  </Pointer>
+                </Draggable>
 
-          {/* Pointers based on regions */}
-          {regions.map((region)=>  {
-            return(       <div>
-              {/* Left pointer for each region */}
-              <Draggable
-                axis="x"
-                bounds={{
-                  left:0,
-                  right: (region.endTime / duration) * width,
-                }}
-                position={{ x: (region.startTime / duration) * width, y: 0 }}
-                onDrag={(e, data) => handleRegionLeftDrag(e, data, region.id)}
-              >
-                <Pointer style={{ backgroundColor: region.color || "#1086FF"}}>
-                  <TimeDisplay>{Math.floor(region.startTime)}s</TimeDisplay>
-                </Pointer>
-              </Draggable>
+                {/* Pointers based on regions */}
+                {regions.map((region) => {
+                  return (
+                    <div>
+                      {/* Left pointer for each region */}
+                      <Draggable
+                        axis='x'
+                        bounds={{
+                          left: 0,
+                          right: (region.endTime / duration) * width,
+                        }}
+                        position={{
+                          x: (region.startTime / duration) * width,
+                          y: 0,
+                        }}
+                        onDrag={(e, data) =>
+                          handleRegionLeftDrag(e, data, region.id)
+                        }
+                      >
+                        <Pointer
+                          style={{ backgroundColor: region.color || "#1086FF" }}
+                        >
+                        </Pointer>
+                      </Draggable>
 
-              {/* Right pointer for each region */}
-              <Draggable
-                axis="x"
-                bounds={{
-                  left: (region.startTime / duration) * width,
-                  right:width,
-                }}
-                position={{ x: (region.endTime / duration) * width, y: 0 }}
-                onDrag={(e, data) => handleRegionRightDrag(e, data, region.id)}
-              >
-                <Pointer style={{ backgroundColor: region.color || "#ff7f7f" }}>
-                  <TimeDisplay>{Math.floor(region.endTime)}s</TimeDisplay>
-                </Pointer>
-              </Draggable>
-            </div>)
-          })            
-          }
-        </>
-      )}
-      </div>
-      </TimelineContainer>
+                      {/* Right pointer for each region */}
+                      <Draggable
+                        axis='x'
+                        bounds={{
+                          left: (region.startTime / duration) * width,
+                          right: width,
+                        }}
+                        position={{
+                          x: (region.endTime / duration) * width,
+                          y: 0,
+                        }}
+                        onDrag={(e, data) =>
+                          handleRegionRightDrag(e, data, region.id)
+                        }
+                      >
+                        <Pointer
+                          style={{ backgroundColor: region.color || "#ff7f7f" }}
+                        >
+                        </Pointer>
+                      </Draggable>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </div>
+        </TimelineContainer>
 
         <ButtonContainer>
           <StyledButton onClick={togglePlayPause}>
@@ -675,7 +771,7 @@ const handleDeleteRegion = (id) => {
             <AddIcon />
           </StyledButton>
         </ButtonContainer>
-        </div>
+      </div>
     </div>
   );
 };
