@@ -291,7 +291,7 @@ const PreviewScreen = () => {
 
   const handleDragRight = (e, data) => {
     const newEndTime = Math.max((data.x / width) * duration, currentTime + 0.1);
-    setEndTime(Math.floor(newEndTime));
+    setEndTime((newEndTime));
   };
 
   const handleRegionLeftDrag = (e, data, index) => {
