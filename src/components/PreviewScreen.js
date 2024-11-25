@@ -177,15 +177,11 @@ const PreviewScreen = () => {
   const playerRef = useRef(null);
   const endTimeRef = useRef(endTime);
   const timeLineWidthRef = useRef(null);
-  // const zoomIntervalsRef = useRef(regions)
 
   useEffect(() => {
     endTimeRef.current = endTime;
   }, [endTime]);
 
-  //   useEffect(() => {
-  //   zoomIntervalsRef.current = regions;
-  // }, [regions]);
 
   const updateWidth = () => {
     if (timeLineWidthRef) {
@@ -253,19 +249,6 @@ const PreviewScreen = () => {
     }
   }, [videoUrl]);
 
-  //   useEffect(() => {
-  //   const video = videoRef.current;
-
-  //   if (video) {
-  //     video.addEventListener('timeupdate', handleTimeUpdate);
-  //   }
-
-  //   return () => {
-  //     if (video) {
-  //       video.removeEventListener('timeupdate', handleTimeUpdate);
-  //     }
-  //   };
-  // }, []);
 
   const togglePlayPause = () => {
     if (playerRef.current) {
@@ -354,37 +337,7 @@ const PreviewScreen = () => {
     setFormValues((prevValues) => ({ ...prevValues, [field]: value }));
   };
 
-  //   const handleSaveRegion = (formValues) => {
-  // const regionFound = regions.find(region => region.id === formValues.id);
-  // console.log("Found Region", regionFound);
-  // console.log("Form Values" , formValues)
 
-  // if (regionFound) {
-  //   const updatedRegion = { ...regionFound, ...formValues };
-  //   console.log("updated" , updatedRegion)
-  //   setRegions(regions.map(region =>
-  //     region.id === formValues.id ? updatedRegion : region
-  //   ))
-  // }
-  //    else {
-  // const newRegion = {
-  //   ...formValues,
-  //   id: regions.length +1,  // This will now override any `id` in `formValues`
-  // };
-  //     console.log("new" , newRegion)
-  //      setRegions([...regions, newRegion]);
-  // }
-  //     setIsDrawerOpen(false);
-  //     setFormValues({
-  //       startTime: 0,
-  //       endTime: 0,
-  //       xCoordinate: 0,
-  //       yCoordinate: 0,
-  //       color: "#ffffff",
-  //       zoomScale: 1,
-  //       id : 0
-  //     });
-  //   };
   const handleSaveRegion = (formValues) => {
     console.log("Form Values:", formValues);
     setRegions((regions) => {
@@ -421,18 +374,7 @@ const PreviewScreen = () => {
   const handleDeleteRegion = (id) => {
     setRegions(regions.filter((region) => region.id !== id));
   };
-  //    const handleEditRegion = (id) => {
-  //    setRegions((prevItems) => {
-  //     const editRegionFound = [...prevItems].find((item) => item.id === id);
 
-  //     if (!editRegionFound) {
-  //       return prevItems;
-  //     }
-  //     return prevItems.map((item) =>
-  //       item.id === index ? { ...item, endTime: (data.x / width) * duration } : item
-  //     );
-  //   });
-  // };
 
   const handleZoomState = () => {
     const currTime = videoRef.current.currentTime;
@@ -443,7 +385,7 @@ const PreviewScreen = () => {
     const styles = activeBlock
       ? {
           transformOrigin: "0 0",
-          transform: `scale(${
+          trnsform: `scale(${
             activeBlock.zoomScale
           }) translate(${-activeBlock.xCoordinate}px, ${-activeBlock.yCoordinate}px)`,
           width: `calc(100% + ${activeBlock.xCoordinate}px)`,
@@ -666,7 +608,7 @@ const PreviewScreen = () => {
                   onDrag={handleDragLeft}
                 >
                   <Pointer style={{ backgroundColor: "#6c63ff" }}>
-                    <TimeDisplay>{Math.floor(currentTime)}s</TimeDisplay>
+                    <TimeDisplay>{(currentTime).toFixed(2)}s</TimeDisplay>
                   </Pointer>
                 </Draggable>
                 <Draggable
@@ -679,12 +621,11 @@ const PreviewScreen = () => {
                   onDrag={handleDragRight}
                 >
                   <Pointer style={{ backgroundColor: "#ff7f7f" }}>
-                    <TimeDisplay>{Math.floor(endTime)}s</TimeDisplay>
+                    <TimeDisplay>{endTime.toFixed(2)}s</TimeDisplay>
                   </Pointer>
                 </Draggable>
               </>
             ) : (
-              // Default pointers at start and end, plus additional ones based on `regions`
               <>
                 <Draggable
                   axis='x'
@@ -735,7 +676,7 @@ const PreviewScreen = () => {
                         </Pointer>
                       </Draggable>
 
-                      {/* Right pointer for each region */}
+
                       <Draggable
                         axis='x'
                         bounds={{
