@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useDebugValue, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { openDB } from "idb";
 import videojs from "video.js";
@@ -22,8 +22,8 @@ const Container = styled.div`
   background-color: #e3edf7; /* Replace with your chosen color */
 `;
 
-const width = (90 /100 * ( window.innerWidth) -18)
-console.log(width)
+// const width = (90 /100 * ( window.innerWidth) -18)
+// console.log(width)
 const Title = styled.h1`
   font-size: 28px;
   font-weight: 600;
@@ -166,11 +166,11 @@ const PreviewScreen = () => {
     id:0
   });
   const [zoomStyle, setZoomStyle] = useState(null);
-  
-
+  const [width , setWindowWidth] =useState(0)
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const endTimeRef = useRef(endTime);
+  const timeLineWidthRef = useRef(null)
   // const zoomIntervalsRef = useRef(regions)
 
   useEffect(() => {
@@ -180,6 +180,23 @@ const PreviewScreen = () => {
   //   useEffect(() => {
   //   zoomIntervalsRef.current = regions;
   // }, [regions]);
+
+      const updateWidth =() => {
+
+    if(timeLineWidthRef) {
+      setWindowWidth(timeLineWidthRef.current.getBoundingClientRect().width - 20)
+    }
+    }
+  useEffect(() => {
+
+    updateWidth()
+
+    console.log(width);
+
+    window.addEventListener("resize" , updateWidth())
+
+    return (() => window.removeEventListener("resize" , updateWidth()))
+  } , [])
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -319,41 +336,76 @@ const handleRegionRightDrag = (e, data, index) => {
     setIsDrawerOpen((prev) => !prev);
   };
     const handleInputChange = (field, value) => {
+      console.log("Field"  , field , "value" , value)
     setFormValues((prevValues) => ({ ...prevValues, [field]: value }));
   };
   
-  const handleSaveRegion = (formValues) => {
-const regionFound = regions.find(region => region.id === formValues.id);
-console.log("Found Region", regionFound);
-console.log("Form Values" , formValues)
+//   const handleSaveRegion = (formValues) => {
+// const regionFound = regions.find(region => region.id === formValues.id);
+// console.log("Found Region", regionFound);
+// console.log("Form Values" , formValues)
 
-if (regionFound) {
-  const updatedRegion = { ...regionFound, ...formValues };
-  console.log("updated" , updatedRegion)
-  setRegions(regions.map(region => 
-    region.id === formValues.id ? updatedRegion : region
-  ))
-}
-   else {
-const newRegion = {
-  ...formValues,
-  id: regions.length +1,  // This will now override any `id` in `formValues`
+// if (regionFound) {
+//   const updatedRegion = { ...regionFound, ...formValues };
+//   console.log("updated" , updatedRegion)
+//   setRegions(regions.map(region => 
+//     region.id === formValues.id ? updatedRegion : region
+//   ))
+// }
+//    else {
+// const newRegion = {
+//   ...formValues,
+//   id: regions.length +1,  // This will now override any `id` in `formValues`
+// };
+//     console.log("new" , newRegion)
+//      setRegions([...regions, newRegion]);
+// }
+//     setIsDrawerOpen(false);
+//     setFormValues({
+//       startTime: 0,
+//       endTime: 0,
+//       xCoordinate: 0,
+//       yCoordinate: 0,
+//       color: "#ffffff",
+//       zoomScale: 1,
+//       id : 0
+//     });
+//   };
+const handleSaveRegion = (formValues) => {
+console.log("Form Values:", formValues);
+setRegions((regions) => {
+  console.log("Previous Regions:", regions);
+
+  const regionFound = regions.find((region) => region.id === formValues.id);
+  console.log("Region Found:", regionFound);
+
+  if (regionFound) {
+    return regions.map((region) =>
+      region.id === formValues.id ? { ...region, ...formValues } : region
+    );
+  } else {
+    const newRegion = { ...formValues, id: regions.length+1 };
+    console.log("New Region:", newRegion);
+    return [...regions, newRegion];
+  }
+
+});
+
+console.log("Drawer Closing and Form Reset");
+
+  setIsDrawerOpen(false);
+  setFormValues({
+    startTime: 0,
+    endTime: 0,
+    xCoordinate: 0,
+    yCoordinate: 0,
+    color: "#ffffff",
+    zoomScale: 1,
+    id: 0,
+  });
 };
-    console.log("new" , newRegion)
-     setRegions([...regions, newRegion]);
-}
-    setIsDrawerOpen(false);
-    setFormValues({
-      startTime: 0,
-      endTime: 0,
-      xCoordinate: 0,
-      yCoordinate: 0,
-      color: "#ffffff",
-      zoomScale: 1,
-      id : 0
-    });
-  };
-   const handleDeleteRegion = (id) => {
+  
+const handleDeleteRegion = (id) => {
     setRegions(regions.filter((region) => region.id !== id));
   };
   //    const handleEditRegion = (id) => {
@@ -416,7 +468,7 @@ const newRegion = {
          <div style={{ padding: "20px", width: "300px" }}>
             <h3>Add Zoom Block</h3>
             <TextField
-              type="number"
+              type="text"
               label="Start Time"
               value={formValues.startTime}
               onChange={(e) => handleInputChange("startTime", e.target.value)}
@@ -424,7 +476,7 @@ const newRegion = {
               margin="normal"
             />
             <TextField
-              type="number"
+              type="text"
               label="End Time"
               value={formValues.endTime}
               onChange={(e) => handleInputChange("endTime", e.target.value)}
@@ -432,7 +484,7 @@ const newRegion = {
               margin="normal"
             />
             <TextField
-              type="number"
+              type="text"
               label="X Coordinate"
               value={formValues.xCoordinate}
               onChange={(e) =>
@@ -442,7 +494,7 @@ const newRegion = {
               margin="normal"
             />
             <TextField
-              type="number"
+              type="text"
               label="Y Coordinate"
               value={formValues.yCoordinate}
               onChange={(e) =>
@@ -458,7 +510,7 @@ const newRegion = {
               />
             </div>
             <TextField
-              type="number"
+              type="text"
               label="Zoom Scale"
               value={formValues.zoomScale}
               onChange={(e) => handleInputChange("zoomScale", e.target.value)}
@@ -491,7 +543,7 @@ const newRegion = {
        </SwipeableDrawer>
     </Container>
     <div style={{display: "flex", alignItems: "center" , backgroundColor : "#e3edf7" }}>
-    <TimelineContainer onDoubleClick={(e) => handleDoubleClick(e)}>
+    <TimelineContainer onDoubleClick={(e) => handleDoubleClick(e)} ref ={timeLineWidthRef}>
  <div style={{ position: "relative", height: "60px", width: "100%" }}>
       {regions.map((region, index) => {
         const { startTime, endTime, color } = region;
